@@ -15,6 +15,7 @@ Arguments:
 # we need the classes and numpy modules 
 import classes as cls
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def read_spec_file (filename):
@@ -83,15 +84,14 @@ def read_spectot_file (filename):
 def read_args( sysargv ):
     
 	'''This function reads arguments from the command line with various options specified by the user'''
+	modea = cls.modeclass(False, False, False, False, False, False, False, False, False, False, False)
     
-    modea = cls.modeclass(False, False, False, False, False, False, False, False, False, False, False)
+	stored1 = cls.stored_args(0,0,0,0,0,0,0)
     
-    stored1 = stored_args(0,0,0,0,0,0,0)
+	modea.sources = True
     
-    modea.sources = True
-    
-    if (len(sysargv)<3):
-        stored1.ibin=1
+	if (len(sysargv)<3):
+		stored1.ibin=1
         
 	for i in range(len(sysargv)):
         
@@ -106,10 +106,13 @@ def read_args( sysargv ):
 			modea.range=True
 			stored1.lmin_arg=float(sysargv[i+1])
 			stored1.lmax_arg=float(sysargv[i+2])
-            
-		if sysargv[i]=='-c': 
+
+		if sysargv[i]=='-c':
 			modea.comp=True
-            
+			try:
+				n_to_comp = int(sysargv[i+1])
+			except:
+				n_to_comp = 1 
 		if sysargv[i]=='-nc': 
 			modea.norm=True
 			modea.comp=True	
@@ -117,9 +120,8 @@ def read_args( sysargv ):
 		if sysargv[i]=='-res': 
 			modea.resid=True
             
-		if sysargv[i]=='h': 
+		if sysargv[i]=='-h' or sysargv[i]=='-h' or sysargv[i]=='help': 
 			modea.help=True
-			dummy=help_me()
             
 		if sysargv[i]=='-rel': 
 			modea.resid=True
@@ -145,7 +147,11 @@ def read_args( sysargv ):
             
 		if sysargv[i]=='-title':
 			stored1.title=sysargv[i+1]
-            
+               
+	if modea.comp:
+		stored1.filename = sysargv[1:n_to_comp+1]  
+	else:           
+		stored1.filename = sysargv[1]   
     # return mode and stored arguments to user        
 	return modea, stored1
 
@@ -156,14 +162,13 @@ def read_args( sysargv ):
 # set some standard parameters
 def setpars():
     
-	print 'setting rcParams'
+	print 'Setting plot parameters for matplotlib.'
 	plt.rcParams['lines.linewidth'] = 1.0
 	plt.rcParams['axes.linewidth'] = 1.3
 	plt.rcParams['font.family'] = 'serif'
 	plt.rcParams['font.serif'] = 'Times New Roman'
 	plt.rcParams['text.usetex']='True'
     
-	print 'you are setting params'
 	return 0
 
 

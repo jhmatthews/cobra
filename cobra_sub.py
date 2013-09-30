@@ -15,6 +15,7 @@ Arguments:
 
 import numpy as np
 import classes as cls
+import sys
 
 
 def smooth_spectrum( spectrum, smooth_factor ):
@@ -96,3 +97,53 @@ def not_smooth_arrays (array, smooth):
         smoothed_array.append(temp1)
         
     return smoothed_array  
+    
+
+
+
+
+
+
+
+
+
+
+def help_me_spec():
+    ''' just a help string for plotting'''
+    help_string = '''
+	University of Southampton -- JM -- 30 September 2013
+
+				You asked for help!
+
+Synopsis:
+	this plots up a spectrum from the Python radiative transfer code
+
+Usage:
+    python plot_spec.py root [-s -c -t -a -n]
+	
+Arguments:
+    -s  smoothing factor, otherwise 1 (e.g. -s 20)
+    -l  plot common lines on the plot (e.g. -s 20)
+    -a  plot a given number of angles (e.g. -a 2 10 27.5)
+    -t  use latex labels 
+    -h  print this help message
+    -c  comparison mode, provide more root files to plot (e.g -c 5, provide 5 root files)
+    
+exiting.    
+'''
+    print help_string
+    sys.exit() 
+    
+    
+    
+def print_cobra():
+    
+    string_to_print = '''             ___.                 
+      ____  ____\_ |______________   
+    _/ ___\/  _ \| __ \_  __ \__  \  
+    \  \__(  <_> ) \_\ \  | \// __ \_
+     \___  >____/|___  /__|  (____  /
+         \/          \/           \/    
+         '''
+    print string_to_print
+    return 

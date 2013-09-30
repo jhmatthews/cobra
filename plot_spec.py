@@ -29,17 +29,20 @@ import numpy as np
 import read_output as rd
 import cobra_sub as sub
 
-
-rd.setpars() #this just sets some standard parameters, e.g. tex
-
-
+sub.print_cobra()
 
 # filename is provided by command line
+print 'Reading your commands from command line'
 mode, store = rd.read_args (sys.argv)
+
+print 'Welcome to cobra, the plotting utility for the radiative transfer code, Python.'
+rd.setpars() #this just sets some standard parameters, e.g. tex
 
 # if user asked for help we print help message and exit
 if mode.help:
-    help_me()
+    sub.help_me_spec()
+
+filename = store.filename
 
 # read the spec file
 spectrum = rd.read_spec_file (filename)
@@ -119,38 +122,3 @@ plt.savefig(sys.argv[1]+'spectrum_summary.jpg',dpi=80,facecolor='w',edgecolor='w
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-def help_me():
-    help_string = '''
-	University of Southampton -- JM -- 30 September 2013
-
-				read_output.py
-
-Synopsis:
-	this plots up a spectrum from the Python radiative transfer code
-
-Usage:
-    python plot_spec.py root [-s -c -t -a -n]
-	
-Arguments:
-    -s  smoothing factor, otherwise 1 (e.g. -s 20)
-    -l  plot common lines on the plot (e.g. -s 20)
-    -a  plot a given number of angles (e.g. -a 2 10 27.5)
-    -t  use latex labels 
-    -h  print this help message
-    -c  comparison mode, provide more root files to plot (e.g -c 5, provide 5 root files)
-    
-exiting.    
-'''
-    sys.exit()
