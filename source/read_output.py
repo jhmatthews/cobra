@@ -16,6 +16,7 @@ Arguments:
 import classes as cls
 import numpy as np
 import matplotlib.pyplot as plt
+import subprocess
 
 
 def read_spec_file (filename):
@@ -172,6 +173,26 @@ def setpars():
 	return 0
 
 
+
+def read_emissivity ( root ):
+    
+    '''Read macro atom emissivities from a root diag file. 
+       Returns two arrays, kpkt_emiss and matom_emiss.'''
+    
+    if not "_0.diag" in root:
+        root = root + "_0.diag"
+    
+    # load file into temporary array    
+    dummy_array = np.loadtxt (root)
+    
+    itemindex=np.where(array=="emissivities")
+    
+    print itemindex
+    print np.array[itemindex]
+    print np.array[itemindex][0]
+    
+    return
+    #return matom_emiss, kpkt_emiss
 
 
 
