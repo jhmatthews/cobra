@@ -1,4 +1,4 @@
-#! /Library/Frameworks/EPD64.framework/Versions/Current/bin/python 
+#! /Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python
 '''
 	University of Southampton -- JM -- 30 September 2013
 

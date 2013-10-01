@@ -182,17 +182,37 @@ def read_emissivity ( root ):
     if not "_0.diag" in root:
         root = root + "_0.diag"
     
-    # load file into temporary array    
-    dummy_array = np.loadtxt (root)
+    # search file for smieeisivities string    
+    matom_emiss, matom_abs = [], []
     
-    itemindex=np.where(array=="emissivities")
+    with open(root, 'r') as searchfile:
+        for line in searchfile:
+            
+            # check if we have a matom_diagnostics line reporting level emissivities
+            if 'emissivities' in line:
+                
+                data = line.split()
+                for i in range(len(data)):
+                                       
+                    # we now put the appropriate values in corresponding arrays 
+                    if data[i] == 'matom_abs':
+                        matom_abs.append(float(data[i+1]))
+                        
+                    if data[i] == 'kpkt_abs':
+                        kpkt_abs = float(data[i+1])
+                        
+                    if data[i] == 'matom_emiss':
+                        matom_emiss.append(float(data[i+1]))
+                        
+                    if data[i] == 'kpkt_emiss':
+                        kpkt_emiss = float(data[i+1])
+                        
+
+    # convert to numpy arrays
+    matom_emiss = np.array(matom_emiss)
+    matom_abs = np.array(matom_abs)
     
-    print itemindex
-    print np.array[itemindex]
-    print np.array[itemindex][0]
-    
-    return
-    #return matom_emiss, kpkt_emiss
+    return matom_emiss, kpkt_emiss
 
 
 
