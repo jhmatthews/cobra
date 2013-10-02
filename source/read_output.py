@@ -216,6 +216,41 @@ def read_emissivity ( root ):
 
 
 
+def thinshell_read ( root ):
+    
+    '''Read py_wind output filename for thin shell models with one cell'''
+    
+    inp = open(root, 'r')
+    
+    for line in inp:
+        data = line.split()
+        if data[0]!="#":
+            if data[2]=="0":
+                value = float(data[1])
+
+    return value
+
+
+def read_convergence (root ):
+	''' check convergence in a file '''
+	if not "_0.diag" in root:
+        	root = root + "_0.diag"
+	conv_fraction = []
+	with open(root, 'r') as searchfile:
+        	for line in searchfile:
+            
+           	 	# check if we have a matom_diagnostics line reporting level emissivities
+            		if 'Summary  convergence' in line:
+                
+                		data = line.split()
+				conv_fraction.append(float (data[3]))
+
+	final_conv = conv_fraction [-1]
+	return final_conv
+		
+
+
+
 
 
 
