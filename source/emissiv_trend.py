@@ -185,7 +185,7 @@ for i in range(imax):
 	if convergence ==1.0:
 
 		# run py_wind
-		os.system ( "py_wind input < input_comms > pywindout &")
+		os.system ( "py_wind input < input_comms > pywindout")
 
 		# get important values from py_wind
 		h1 = rd.thinshell_read ( root + ".ionH1.dat" )	# fraction of h1
@@ -215,14 +215,14 @@ for i in range(imax):
 
 				# now append values to array
 				hbeta_list.append( hbeta )
-				hbeta_quantity.append (PI*hbeta / (2.3e23 * ne**2  ))	# quantity from osterbrock
+				hbeta_quantity.append ( PI*hbeta / (2.3e23 * ne**2) )	# quantity from osterbrock
 				halpha_over.append ( matom_emiss[2] / hbeta )	# ratio of H alpha to H beta
 
 				# append the actual level emissivities
-				matom_emissivities.append ( matom_emiss )
-				kpkt_emissivities.append ( kpkt_emiss )
+				matom_emissivities.append (matom_emiss)
+				kpkt_emissivities.append (kpkt_emiss)
 
-				print '\nt_E %8.4e ne %8.4e hbeta %8.4e 4pi j /ne^2 %8.4e h1 %f\n' % (t_e, ne, hbeta, 4.0*PI*hbeta / (2.3e23 * ne**2)  , h1)
+				print "\nt_E %8.4e ne %8.4e hbeta %8.4e 4pi j /ne^2 %8.4e h1 %f\n" % (t_e, ne, hbeta, 4.0*PI*hbeta / (2.3e23 * ne**2)  , h1)
 	
 		else:
 			print 'Non ionised model...'
