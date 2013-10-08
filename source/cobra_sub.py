@@ -136,6 +136,42 @@ exiting.
     
     
     
+    
+def help_me_emissivities():
+    '''help string for thin shell plotting code'''
+    
+    help_string='''
+    University of Southampton -- JM -- 30 September 2013
+
+				plot_emissiv.py 
+
+Synopsis:
+
+	Plot macro atom level emissivities and other information from
+	diag file for a variety of temperatures
+    
+    This code sets up a thin shell model with an illuminating blackbody.
+    It then iterates over black body temperature to alter the electron
+    temperature 
+
+Usage:
+    emissiv_trend.py [keyword to change] [value] [-h]
+    
+    uses a file template.pf to provide the base model
+	
+Arguments:
+    keyword_to_change   the keyword in the pf file you wish to modify
+    value               the value you wish to change it to
+    -h                  get this help message and exit
+    
+
+'''
+
+    print help_string
+    return 0
+    
+    
+    
 def print_cobra():
     
     string_to_print = '''             ___.                 

@@ -1,17 +1,29 @@
 #! /Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python
 '''
-	University of Southampton -- JM -- 30 September 2013
+    University of Southampton -- JM -- 30 September 2013
 
 				plot_emissiv.py 
 
 Synopsis:
+
 	Plot macro atom level emissivities and other information from
-	diag file
+	diag file for a variety of temperatures
+    
+    This code sets up a thin shell model with an illuminating blackbody.
+    It then iterates over black body temperature to alter the electron
+    temperature 
 
 Usage:
+    emissiv_trend.py [keyword to change] [value] [-h]
+    
+    uses a file template.pf to provide the base model
 	
-
 Arguments:
+    keyword_to_change   the keyword in the pf file you wish to modify
+    value   the value you wish to change it to
+    -h      get this help message and exit
+    
+
 '''
 
 import matplotlib.pyplot as plt
@@ -21,10 +33,24 @@ import sys, os, subprocess
 import read_output as rd
 from constants import *
 from sub_report import *
+import cobra_sub as cobra
+
+nargs = len(sys.argv)
+if nargs>1:
+    for i in range(len(sys.argv)):
+        if sys.argv[i]=='-h' or sys.argv[i]=='h' or sys.argv[i]=='help':
+            cobra.help_me_emissivities()
+            sys.exit()
+    
+
+
+# print out a big cobra sign!
+cobra.print_cobra()
 
 
 
-t_init = 8000.0 # this is the temperatrue of the blackbody
+# we iterate over blackbody temperatire
+t_init = 8000.0 # this is the starting temperture of the blackbody
 imax = 20 # maximum steps we iterate over
 i_temp_steps = 500  # step widths in temp space
 MACRO = 7
@@ -88,7 +114,6 @@ for i in range(len(sys.argv)):
 		values [index_to_array] = new_value
 
 		print 'Changed keyword %s from %s to %s' % (keyword, old_value, new_value)
-		print values
 	
 
 
@@ -152,51 +177,55 @@ for i in range(imax):
 	rootfolder = "diag_input/"
 
 
-	# check convergence and run diagnostics if it equals 1
+	# check convergence 
 	convergence = rd.read_convergence ( rootfolder + root )
-	print '\nconvergence fraction = %f' % convergence
+	print 'convergence fraction = %f' % convergence
 
+	# if we are converged, do diagnositcs
 	if convergence ==1.0:
 
 		# run py_wind
-		os.system ( "py_wind input < input_comms > pywindout")
+		os.system ( "py_wind input < input_comms > pywindout &")
 
 		# get important values from py_wind
 		h1 = rd.thinshell_read ( root + ".ionH1.dat" )	# fraction of h1
 		ne = rd.thinshell_read ( root + ".ne.dat" )
 		t_e = rd.thinshell_read ( root + ".te.dat" )
 		
+		if h1 < 0.02: # check if the model is ionised
+			# now append the values for hydrogen density, 
+			# ne and electron temp as well as BB temp
+			h1_list.append (h1)
+			ne_list.append( ne )
+			t_e_list.append( t_e )
+			t_bb.append(tstar)
 
-		# now append the values for hydrogen density, 
-		# ne and electron temp as well as BB temp
-		h1_list.append (h1)
-		ne_list.append( ne )
-		t_e_list.append( t_e )
-		t_bb.append(tstar)
+			# now append some important macro atom values to array
 
-		# now append some important macro atom values to array
+			if mode == MACRO:
 
-		if mode == MACRO:
-
-			# read emissivities from diag file
-			matom_emiss, kpkt_emiss = rd.read_emissivity ( rootfolder + root )
+				# read emissivities from diag file
+				matom_emiss, kpkt_emiss = rd.read_emissivity ( rootfolder + root )
 	
-			# get hbeta level emissivity
-			hbeta = matom_emiss[3]
-			nlevels_macro = len(matom_emiss)
+				# get hbeta level emissivity
+				hbeta = matom_emiss[3]
+				nlevels_macro = len(matom_emiss)
 
-			n_array = np.arange (nlevels_macro)
+				n_array = np.arange (nlevels_macro)
 
-			# now append values to array
-			hbeta_list.append( hbeta )
-			hbeta_quantity.append (PI*hbeta / (2.3e23 * ne**2  ))	# quantity from osterbrock
-			halpha_over.append ( matom_emiss[2] / hbeta )	# ratio of H alpha to H beta
+				# now append values to array
+				hbeta_list.append( hbeta )
+				hbeta_quantity.append (PI*hbeta / (2.3e23 * ne**2  ))	# quantity from osterbrock
+				halpha_over.append ( matom_emiss[2] / hbeta )	# ratio of H alpha to H beta
 
-			# append the actual level emissivities
-			matom_emissivities.append ( matom_emiss )
-			kpkt_emissivities.append ( kpkt_emiss )
+				# append the actual level emissivities
+				matom_emissivities.append ( matom_emiss )
+				kpkt_emissivities.append ( kpkt_emiss )
 
-			print '\nt_E %8.4e ne %8.4e hbeta %8.4e 4pi j /ne^2 %8.4e h1 %8.4e' % (t_e, ne, hbeta, 4.0*PI*hbeta / (2.3e23 * ne**2)  , h1)
+				print '\nt_E %8.4e ne %8.4e hbeta %8.4e 4pi j /ne^2 %8.4e h1 %f\n' % (t_e, ne, hbeta, 4.0*PI*hbeta / (2.3e23 * ne**2)  , h1)
+	
+		else:
+			print 'Non ionised model...'
 
 	else:
 		print 'Non Converged model...'
@@ -223,13 +252,13 @@ fig = plt.figure()
 
 
 
-# arrays of the predicted values from Osterbrock
+# we need to define arrays of the predicted values from Osterbrock
 
-# first the array of temperatures Osterbrock gives
+# first the array of temperatures Osterbrock gives- just a short range
 t_e_oster =  np.arange(2500, 12500, 2500)
 
 # now line intensities
-oster_h_beta_absolute = np.array  ([ 2.7e-25, 1.54e-25, 8.30e-26, 4.21e-26])  # 4pi j_hbeta / ne **2 values
+oster_h_beta_absolute =  np.array  ([ 2.7e-25, 1.54e-25, 8.30e-26, 4.21e-26])  # 4pi j_hbeta / ne **2 values
 oster_h_alpha_relative = np.array ([ 3.42, 3.10, 2.86, 2.69])	# ratios of halpha to hbeta from osterbrock
 oster_h_gamma_relative = np.array ([ 0.439, 0.458, 0.470, 0.485]) # ratios of hgamma to hbeta from osterbrock
 oster_h_delta_relative = np.array ([ 0.237, 0.25, 0.262, 0.271])  # ratios of hdelta to hbeta from osterbrock
@@ -239,13 +268,18 @@ oster_h_delta_relative = np.array ([ 0.237, 0.25, 0.262, 0.271])  # ratios of hd
 # if we are in macro mode we want to plot lots of things
 if mode == MACRO:
 	plot_list = [ halpha_over, hbeta_quantity, hbeta_list, t_bb]
+    
 	oster_list = [ oster_h_beta_absolute, oster_h_gamma_relative, oster_h_delta_relative ]
+    
+    # we need some raw latex strings for labels
 	ylabel = [ r'$H \alpha / H \beta$', r'$4\pi j_{H \beta} / n_e^2$', r'$H \beta$', '$T_{bb}$']
+
+# if we aren't in macro mode we on;y want to plot a few things
 else: 
 	plot_list = [ ne_list, t_bb]
 	ylabel = [ '$n_e$', '$T_{bb}$']
 
-print t_e_list, plot_list[0]
+
 
 # number of things to plot
 n = len(plot_list)
@@ -261,7 +295,7 @@ for i in range(n):
 	if i ==1: ax.scatter(t_e_oster, oster_h_beta_absolute)	
 	ax.set_ylabel(ylabel[i])
 	
-	ax.set_xlabel("Electron Temp")
+	ax.set_xlabel(r"$T_e$ (K)")
 
 
 
@@ -270,4 +304,10 @@ if mode == MACRO:
 	plt.savefig("macro.png")
 else:
 	plt.savefig("nonmacro.png")
+    
+    
+    
+    
+    
+    
 
