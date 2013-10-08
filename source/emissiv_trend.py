@@ -20,19 +20,23 @@ import numpy as np
 import sys, os, subprocess
 import read_output as rd
 from constants import *
+from sub_report import *
 
 
 
-t_init = 10000.0 # this is the temperatrue of the blackbody
-imax = 10 # maximum steps we iterate over
-i_temp_steps = 1000  # step widths in temp space
+t_init = 8000.0 # this is the temperatrue of the blackbody
+imax = 20 # maximum steps we iterate over
+i_temp_steps = 500  # step widths in temp space
+MACRO = 7
+
+
 
 # now we want a list of pywind cmds
 # we want to make files 
 # we want electron density
 # we want neutral hydrogen density and non neutral
 #pywindcmds = [ 1, 'n', 't',  'i', 1, 1, 1, 1, 2, 0, 'q']  
-pywindcmds = [ 1, 'n', 't', 'q', 'i', 1, 1, 0, 'q']  
+pywindcmds = [ 1, 'n', 't', 'i', 0, 1, 1, 0, 'q']  
 
 # first write these commands to a file
 inp =open('input_comms','w')
@@ -45,10 +49,55 @@ inp.close()
 rd.setpars()	# set standard plotting parameters, e.g. tex
 
 
+
+
+
+
 # set the band you want to plot emissivities over
 # 3000-7000 will get the balmer continuum
 wavemin = 3000.0
 wavemax = 7000.0
+
+
+
+
+# we read from a template file template.pf
+print 'Reading template parameter file'
+keywords, values = np.loadtxt('template.pf', dtype='string', unpack=True)
+
+
+
+
+# we read a number of arguments from the command line
+# the user can decide to change certain keywords
+for i in range(len(sys.argv)):
+	keyword = sys.argv[i]
+
+	# search keyword array for keyword desired
+	index_to_array = np.where(keywords == keyword)
+	
+	# create an array of values that have a keyword match - should be length 1!!
+	value_matches = values[ index_to_array ]
+
+	if len(value_matches)>1:	# if we havemore than one match this an error
+		Error('Multiple keyword matches in parameter file!')
+
+	elif len(value_matches)>0:	# if we have one match, change the value
+		old_value = value_matches[0]
+		new_value = sys.argv[i+1]
+		values [index_to_array] = new_value
+
+		print 'Changed keyword %s from %s to %s' % (keyword, old_value, new_value)
+		print values
+	
+
+
+
+
+# now get the line transfer mode	
+mode = int (values[ np.where(keywords == 'Line_transfer()') ][0])
+if mode == MACRO:
+	print 'Working with macro atom line transfer so turning on emissivitiy diagnostics'
 
 
 # empty arrays to append to
@@ -60,7 +109,10 @@ h1_list= []
 ne_list= []
 t_e_list = []
 hbeta_quantity=[]
+halpha_over=[]
+t_bb=[]
 
+print 'Mass loss rate is ', values[ np.where(keywords == 'shell_wind_mdot(msol/yr)') ][0]
 
 # now do the loop over temperature
 for i in range(imax):
@@ -69,150 +121,153 @@ for i in range(imax):
 	tstar = t_init + (i * i_temp_steps)
 	
 	# print some info for the user 
-	print 'Starting cycle '+str(i+1)+' of '+str(imax) print 'tstar = %lf' % tstar
+	print 'Starting cycle '+str(i+1)+' of '+str(imax) 
+	print 'tstar = %lf' % tstar
 
 
 		   
 	# now we open a file for temporary pf, and write to it
 	inp =open('input.pf','w')
-	inp.write("Wind_type() 9\n")
-	inp.write("Atomic_data					   data/h20\n")
-	inp.write("photons_per_cycle						   100000\n")
-	inp.write("Ionization_cycles							   100\n")
-	inp.write("spectrum_cycles								   1\n")
-	inp.write("Coord.system()				   0\n")
-	inp.write("Wind.dim.in.x_or_r.direction					 4\n")
-	inp.write("Wind_ionization()				   3\n")
-	inp.write("Line_transfer()					7\n")
-	inp.write("System_type()				   0\n")
-	inp.write("Star_radiation(y=1)							  1\n")
-	inp.write("Disk_radiation(y=1)							  0\n")
-	inp.write("Boundary_layer_radiation(y=1)			0\n")
-	inp.write("Wind_radiation(y=1)							  0\n")
-	inp.write("Rad_type_for_star(0=bb,1=models)_to_make_wind				   0\n")
-	inp.write("mstar(msol)									 0.8\n")
-	inp.write("rstar(cm)									 1e10\n")
-	inp.write("tstar									  %lf\n" % tstar)
-	inp.write("disk.type()				   		0\n")
-	inp.write("Torus(0=no,1=yes)				0\n")
-	inp.write("wind.radmax(cm)				   1.00000000001e11\n")
-	inp.write("wind.t.init								10000\n")
-	inp.write("shell_wind_mdot(msol/yr)					 0.00472e-19\n")
-	inp.write("shell.wind.radmin(cm)					   1e11\n")
-	inp.write("shell.wind_v_at_rmin(cm)					1.00000\n")
-	inp.write("shell.wind.v_at_rmax(cm)					1.000010\n")
-	inp.write("shell.wind.acceleration_exponent				   1\n")
-	inp.write("Rad_type_for_star()_in_final_spectrum				  0\n")
-	inp.write("spectrum_wavemin 				%f\n" % wavemin)
-	inp.write("spectrum_wavemax				%f\n" % wavemax)
-	inp.write("no_observers	1\n")
-	inp.write("angle(0=pole)	45\n")
-	inp.write("phase(0=inferior_conjunction) 	0.5\n")
-	inp.write("live.or.die(0).or.extract(anything_else) 1\n")
-	inp.write("Select_specific_no_of_scatters_in_spectra(y/n)  	n\n")
-	inp.write("Select_photons_by_position(y/n)  	n\n")
-	inp.write("spec.type(flambda(1),fnu(2),basic(other)					2\n")
-	inp.write("Extra.diagnostics(0=no)						   0\n")
-	inp.write("Use.standard.care.factors(1=yes)					1\n")
-	inp.write("Photon.sampling.approach()				   3\n")
+
+	# cycle through keywords and write to file
+	for j in range(len(keywords)):
+	
+		# if the keyword is tstar then we are iterating over it
+		if keywords[j] == 'tstar':
+			inp.write("tstar		%lf\n" % tstar)
+
+		# if not just write the value stored in the values array
+		else:
+			inp.write('%s    %s\n' % (keywords[j], values[j]))
+
+	# close file
 	inp.close()
 	
 	
-	# pf file created, let's run it
-	os.system( "py76c_dev input > output")	
-	#subprocess.check_call("tail -n 60 output  | grep MACROOUTPUT > temp",shell=True)
+	# pf file created, let's run it using latest vers
+	os.system( "py76c_dev input > output")
 
-
-	# run py_wind
-	os.system ( "py_wind input < input_comms > pywindout")
-	
-	# now get the key values from the pywind files
-	root = "input"
-	h1 = rd.thinshell_read ( root + ".ioncH1.dat" )
-	#h2 = rd.thinshell_read ( root + ".ioncH2.dat" )
-	ne = rd.thinshell_read ( root + ".ne.dat" )
-	t_e = rd.thinshell_read ( root + ".te.dat" )
-	#nh = h1 + h2
-		
+	# define root names
 	root = "input"
 	rootfolder = "diag_input/"
-	matom_emiss, kpkt_emiss = rd.read_emissivity ( rootfolder + root )
+
+
+	# check convergence and run diagnostics if it equals 1
 	convergence = rd.read_convergence ( rootfolder + root )
 	print '\nconvergence fraction = %f' % convergence
 
-	hbeta = matom_emiss[3]
-	nlevels_macro = len(matom_emiss)
-	n_array = np.arange (nlevels_macro)
+	if convergence ==1.0:
 
-	# now append some important values to array
-	hbeta_list.append( hbeta )
-	hbeta_quantity.append (4.0*PI*hbeta / ne**2)
-	matom_emissivities.append ( matom_emiss )
-	kpkt_emissivities.append ( kpkt_emiss )
-	h1_list.append (h1)
-	#nh_list.append( nh )
-	#h2_list.append( h2 )
-	ne_list.append( ne )
-	t_e_list.append( t_e )
-	print '\nt_E %8.4e ne %8.4e hbeta %8.4e 4pi j /ne^2 %8.4e h1 %8.4e' % (t_e, ne, hbeta, 4.0*PI*hbeta / ne**2, h1)
+		# run py_wind
+		os.system ( "py_wind input < input_comms > pywindout")
+
+		# get important values from py_wind
+		h1 = rd.thinshell_read ( root + ".ionH1.dat" )	# fraction of h1
+		ne = rd.thinshell_read ( root + ".ne.dat" )
+		t_e = rd.thinshell_read ( root + ".te.dat" )
+		
+
+		# now append the values for hydrogen density, 
+		# ne and electron temp as well as BB temp
+		h1_list.append (h1)
+		ne_list.append( ne )
+		t_e_list.append( t_e )
+		t_bb.append(tstar)
+
+		# now append some important macro atom values to array
+
+		if mode == MACRO:
+
+			# read emissivities from diag file
+			matom_emiss, kpkt_emiss = rd.read_emissivity ( rootfolder + root )
+	
+			# get hbeta level emissivity
+			hbeta = matom_emiss[3]
+			nlevels_macro = len(matom_emiss)
+
+			n_array = np.arange (nlevels_macro)
+
+			# now append values to array
+			hbeta_list.append( hbeta )
+			hbeta_quantity.append (PI*hbeta / (2.3e23 * ne**2  ))	# quantity from osterbrock
+			halpha_over.append ( matom_emiss[2] / hbeta )	# ratio of H alpha to H beta
+
+			# append the actual level emissivities
+			matom_emissivities.append ( matom_emiss )
+			kpkt_emissivities.append ( kpkt_emiss )
+
+			print '\nt_E %8.4e ne %8.4e hbeta %8.4e 4pi j /ne^2 %8.4e h1 %8.4e' % (t_e, ne, hbeta, 4.0*PI*hbeta / (2.3e23 * ne**2)  , h1)
+
+	else:
+		print 'Non Converged model...'
+
 
 
 # we need to normalise hbeta to be in units of erg cm^-3 s-1
 
 
-
 hbeta_list = np.array(hbeta_list)
+halpha_over = np.array(halpha_over)
 ne_list = np.array(ne_list)
 t_e_list = np.array(t_e_list)
 h1_list = np.array(h1_list)
 
 fig = plt.figure()
 
-# number of things to plot
-n = 4
 
 # order of things to plot
-t_bb = np.arange(t_init, t_init + (imax+1)*i_temp_steps, i_temp_steps)# this is the temperatrue of the blackbody
+#t_bb = np.arange(t_init, t_init + (imax)*i_temp_steps, i_temp_steps)# this is the temperatrue of the blackbody
 
 
 #pi_hbeta_over_nenep = ( 4.0*PI*hbeta_list / ne_list**2  ) / 1.3e+23
-osterbrock = np.array([ 2.7e-25, 1.54e-25, 8.30e-26, 4.21e-26])
+
+
+
+# arrays of the predicted values from Osterbrock
+
+# first the array of temperatures Osterbrock gives
 t_e_oster =  np.arange(2500, 12500, 2500)
 
-plot_list = [ ne_list, hbeta_quantity, hbeta_list, t_bb]
-ylabel = [ 'ne', 'h1', 'hbeta', 'kpkt emissivities']
+# now line intensities
+oster_h_beta_absolute = np.array  ([ 2.7e-25, 1.54e-25, 8.30e-26, 4.21e-26])  # 4pi j_hbeta / ne **2 values
+oster_h_alpha_relative = np.array ([ 3.42, 3.10, 2.86, 2.69])	# ratios of halpha to hbeta from osterbrock
+oster_h_gamma_relative = np.array ([ 0.439, 0.458, 0.470, 0.485]) # ratios of hgamma to hbeta from osterbrock
+oster_h_delta_relative = np.array ([ 0.237, 0.25, 0.262, 0.271])  # ratios of hdelta to hbeta from osterbrock
+
+
+
+# if we are in macro mode we want to plot lots of things
+if mode == MACRO:
+	plot_list = [ halpha_over, hbeta_quantity, hbeta_list, t_bb]
+	oster_list = [ oster_h_beta_absolute, oster_h_gamma_relative, oster_h_delta_relative ]
+	ylabel = [ r'$H \alpha / H \beta$', r'$4\pi j_{H \beta} / n_e^2$', r'$H \beta$', '$T_{bb}$']
+else: 
+	plot_list = [ ne_list, t_bb]
+	ylabel = [ '$n_e$', '$T_{bb}$']
+
+print t_e_list, plot_list[0]
+
+# number of things to plot
+n = len(plot_list)
+
 
 for i in range(n):
 	
-	ax = fig.add_subplot( n/2, 2, i)
+	ax = fig.add_subplot( n/2, 2, i+1)
 	
-	
+	print i
 	ax.plot(t_e_list, plot_list[i])
-	if i ==1: ax.plot(t_e_oster, osterbrock)	
+	if i ==0: ax.scatter(t_e_oster, oster_h_alpha_relative)	
+	if i ==1: ax.scatter(t_e_oster, oster_h_beta_absolute)	
 	ax.set_ylabel(ylabel[i])
 	
 	ax.set_xlabel("Electron Temp")
-	
-plt.savefig("macro.png")
-	
-
- 
-'''
-hbeta = matom_emiss[3]
-#hbeta.append(hbeta)
-print hbeta
-
-# scatter plot of level emissivities
-plt.suptitle(label)
-plt.scatter(n_array, matom_emiss / hbeta)
-plt.xlabel( "n" )
-plt.ylabel( "Macro atom level emissivities / H_beta level emissivity" )
-plt.savefig ( root + "_emissiv.png" )
-
-arr = [86354000.0, 115280000.0, 164750000.0]
-temp = [ ]
-plt.plot()
-'''
 
 
+
+# finally, save the figures	
+if mode == MACRO:
+	plt.savefig("macro.png")
+else:
+	plt.savefig("nonmacro.png")
 
