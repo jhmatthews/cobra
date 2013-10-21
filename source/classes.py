@@ -86,3 +86,22 @@ class stored_args:
 		self.maximum_y=maxy
 		self.filename=filestore
 		self.title=titlestore
+
+
+# line class: analogous to line ptr in python. contains freq, oscillator strength, 
+class line:
+	'''This is a class analogous to line ptr in python'''
+	def __init__(self, _z, _ion, _wavelength, _freq, _osc, _g_l, _g_u, _ll, _lu):
+		self.z = _z
+		self.ion = _ion
+		self.wavelength = _wavelength
+		self.freq = _freq
+		self.osc = _osc
+		self.g_l = _g_l
+		self.g_u = _g_u
+		self.ll = _ll
+		self.lu = _lu
+
+
+
+

@@ -51,10 +51,10 @@ cobra.print_cobra()
 
 # we iterate over blackbody temperatire
 t_init = 8000.0 # this is the starting temperture of the blackbody
-imax = 20 # maximum steps we iterate over
-i_temp_steps = 500  # step widths in temp space
+imax = 10 # maximum steps we iterate over
+i_temp_steps = 1000  # step widths in temp space
 MACRO = 7
-
+MACRO_ISO=6
 
 
 # now we want a list of pywind cmds
@@ -121,7 +121,7 @@ for i in range(len(sys.argv)):
 
 # now get the line transfer mode	
 mode = int (values[ np.where(keywords == 'Line_transfer()') ][0])
-if mode == MACRO:
+if mode == MACRO or mode==MACRO_ISO:
 	print 'Working with macro atom line transfer so turning on emissivitiy diagnostics'
 
 
@@ -202,7 +202,7 @@ for i in range(imax):
 
 			# now append some important macro atom values to array
 
-			if mode == MACRO:
+			if mode == MACRO or MACRO_ISO:
 
 				# read emissivities from diag file
 				matom_emiss, kpkt_emiss = rd.read_emissivity ( rootfolder + root )
@@ -215,7 +215,7 @@ for i in range(imax):
 
 				# now append values to array
 				hbeta_list.append( hbeta )
-				hbeta_quantity.append ( PI*hbeta / (2.3e23 * ne**2) )	# quantity from osterbrock
+				hbeta_quantity.append ( hbeta / (1.3e23 * ne**2) )	# quantity from osterbrock
 				halpha_over.append ( matom_emiss[2] / hbeta )	# ratio of H alpha to H beta
 
 				# append the actual level emissivities
@@ -255,21 +255,21 @@ fig = plt.figure()
 # we need to define arrays of the predicted values from Osterbrock
 
 # first the array of temperatures Osterbrock gives- just a short range
-t_e_oster =  np.arange(2500, 12500, 2500)
+t_e_oster =  [2500.0, 5000.0, 10000.0, 20000.0]
 
 # now line intensities
 oster_h_beta_absolute =  np.array  ([ 2.7e-25, 1.54e-25, 8.30e-26, 4.21e-26])  # 4pi j_hbeta / ne **2 values
 oster_h_alpha_relative = np.array ([ 3.42, 3.10, 2.86, 2.69])	# ratios of halpha to hbeta from osterbrock
 oster_h_gamma_relative = np.array ([ 0.439, 0.458, 0.470, 0.485]) # ratios of hgamma to hbeta from osterbrock
 oster_h_delta_relative = np.array ([ 0.237, 0.25, 0.262, 0.271])  # ratios of hdelta to hbeta from osterbrock
-
+oster_p_alpha_relative = np.array ([ 0.684, 0.562, 0.466, 0.394])  # ratios of palpha to hbeta from osterbrock
 
 
 # if we are in macro mode we want to plot lots of things
-if mode == MACRO:
+if mode == MACRO or mode==MACRO_ISO:
 	plot_list = [ halpha_over, hbeta_quantity, hbeta_list, t_bb]
     
-	oster_list = [ oster_h_beta_absolute, oster_h_gamma_relative, oster_h_delta_relative ]
+	oster_list = [ oster_h_beta_absolute, oster_h_gamma_relative, oster_p_alpha_relative ]
     
     # we need some raw latex strings for labels
 	ylabel = [ r'$H \alpha / H \beta$', r'$4\pi j_{H \beta} / n_e^2$', r'$H \beta$', '$T_{bb}$']
@@ -290,12 +290,15 @@ for i in range(n):
 	ax = fig.add_subplot( n/2, 2, i+1)
 	
 	print i
-	ax.plot(t_e_list, plot_list[i])
-	if i ==0: ax.scatter(t_e_oster, oster_h_alpha_relative)	
-	if i ==1: ax.scatter(t_e_oster, oster_h_beta_absolute)	
+	ax.plot(t_e_list, plot_list[i], c='b')
+	if i ==0: 
+		ax.plot(t_e_oster, oster_h_alpha_relative)	
+	if i ==1: 
+		ax.plot(t_e_oster, oster_h_beta_absolute)	
 	ax.set_ylabel(ylabel[i])
 	
 	ax.set_xlabel(r"$T_e$ (K)")
+	
 
 
 
