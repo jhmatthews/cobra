@@ -1,6 +1,7 @@
 #! /Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python
 '''
-astro_func.py contains functions for things like eddington fraction and alpha_ox
+disk.py contains functions for things like 
+disk luminosities, eddington fraction and alpha_ox
 '''
 
 from constants import *

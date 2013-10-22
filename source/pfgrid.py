@@ -34,7 +34,7 @@ if len(sys.argv)>1:
 
 
 # read in template file
-keywords, values = np.loadtxt('template.pf', dtype='string', unpack=True)
+template = np.loadtxt('template.pf', dtype='string', unpack=True)
 
 '''# read in grid of values to change
 grid = np.loadtxt('grid_values', dtype='string', unpack=True, comments ="#")
@@ -79,15 +79,19 @@ EDD = np.array([0.1, 0.2, 0.5])			# eddington fractions
 L_X = np.array([1e43, 1e44, 1e45])		# X-ray luminosities
 MDOT_FRAC = np.array([0.1, 1.0, 10.0])	# mdot wind as fraction of mdot acc
 
+
 # lengths of arrays
 nmasses = len(MBH)
 nagn = len(L_X)
 nwind = len(MDOT_FRAC)
 ndisk = len(EDD)
 
+
+'''
 print "Fiducial model:"
 print "-----------------------"
 m = 1.0e9; mdot = 5.0; lum_agn = 1.0e43
+
 print "L_bol: %8.4e" % ast.L_bol ( mdot, m)
 
 L_2kev = ast.L_two ( lum_agn , -0.9)
@@ -96,11 +100,21 @@ alpha_ox = ast.alp_ox ( L_2kev, L_2500 )
 print "L_2kev: %8.4e   L_2500: %8.4e   alpha_ox: %f" % (L_2kev, L_2500, alpha_ox)
 
 freq_disk, specdisk = ast.spec_disk(1e14,1e18,m,mdot,8.85667e+14,1e17)
-print freq_disk, specdisk
+
+
+
+
+
+#print freq_disk, specdisk
 
 pylab.plot ( freq_disk, specdisk )
 pylab.show()
 print np.sum( specdisk)
+
+
+sys.exit()
+'''
+
 
 for i in range( nmasses):
 
@@ -119,26 +133,49 @@ for i in range( nmasses):
 		
 			for l in range(nwind):
 			
-				write_array = values
+				mdotwind = MDOT_FRAC[l] * mdot
+			
+				root = "run%i_edd%.1f_w%.1f_l%i" %  ( n, edd_frac, mdotwind, np.log10(lum_agn) ) 
+				filename = "%s.pf" % root
+				
+
+				
+				inp = open(filename, "w")
+			
+				write_array = template
 			
 				L_2kev = ast.L_two ( lum_agn , -0.9)
-				L_2500 = ast.L_2500 ( mdot, m )
+				L_2500 = 6.3e30 * (edd_frac / 0.2 )
 				
 				alpha_ox = ast.alp_ox ( L_2kev, L_2500 )
 				
-				print "\nModel %i" % n
+				print "\nModel %i %s" % (n, root)
 				print "-----------------------"
 				print "L_2kev: %8.4e   L_2500: %8.4e   alpha_ox: %f" % (L_2kev, L_2500, alpha_ox)
-				#print "L_X: %8.4e   L_bol: %8.4e" % (lum_agn, lum_bol)
 				
-				freq_disk, specdisk = ast.spec_disk(1e14,1e18,m,mdot,8.85667e+14,1e17)
-				print np.sum( specdisk)
+				#print "L_X: %8.4e   L_bol: %8.4e" % (lum_agn, lum_bol)'''
+				
+				'''freq_disk, specdisk = ast.spec_disk(1e14,1e18,m,mdot,8.85667e+14,1e17)
+				
+				print np.sum( specdisk)'''
 		
-	
+				index = np.where(write_array[0] == "mstar(msol)")
+				write_array [1][ index ] = str ( m )
+				
+				index = np.where(write_array[0] =="lum_agn(ergs/s) ")
+				write_array [1][ index ] = str (lum_agn )
+				
+				index = np.where ( write_array[0] =="disk.mdot(msol/yr)")
+				write_array [1][ index ] = str (mdot)
+				
+				index_m = np.where(write_array[0] =="wind.mdot(msol/yr)")
+				write_array [1][ index ] = str (mdotwind) 
 
 				#filename = "run_%i" % n
-	
-				#np.savetxt(filename, write_array[n], dtype='string', unpack=True)
+				
+				write_array = np.transpose ( write_array)
+			
+				np.savetxt(filename, write_array, fmt="%s\t%s\n")
 	
 				n += 1 
 	
@@ -156,13 +193,16 @@ sys.exit()
 
 print "writing to script..."
 inp = open("script", "w")
-inp.write("#!/bin/bash\n")
-inp.write("cd /home/jm8g08/shankar\n")
+inp.write("#!/bin/bash\n\n")
+inp.write("cd /home/jm8g08/shankar\n\n")
 i = 0
 for line in inp:
 	root = roots[i]
 	inp.write("py76c_dev %s > %s.out &\n" % root)
 	i += 1
+	
+inp.write("wait\n")
+inp.close()
 
 print "All done!"
 
