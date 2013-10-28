@@ -18,7 +18,7 @@ def alp_ox (L_X, L_O):
 	
 def Ledd (m):
 	'''
-	calculates eddington luminosity for a solar mass m
+	calculates eddington luminosity for mass m in solar masses
 	'''
 	m *= MSOL
 	
@@ -33,10 +33,13 @@ def Ledd (m):
 def mdot_from_edd ( edd_frac, m ):
 	''' 
 	calculates an accretion rate from an eddington fraction
-	mass m
+	edd_frac		eddington fraction
+	m			mass of central object in solar masses
+	
+	returns mdot in solar masses / yr
 	'''
 	
-	L = Ledd (m)		# eddington luminosity
+	L = Ledd (m)		# eddington luminosity in ergs s^-1
 	
 	mdot = L / ( edd_frac * (C ** 2) )
 	

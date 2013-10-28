@@ -69,7 +69,7 @@ def L_two (L_X, alpha):
 	
 def L_2500 ( mdot, mbh ):
 	'''
-	L_two calculates the monochromatic X-ray luminosity at 2Kev
+	L_2500 calculates the monochromatic luminosity at 2500 Angstroms
 	
 	Arguments:
 		m		black hole mass
@@ -136,9 +136,9 @@ def spec_disk ( f1, f2, m, mdot, rmin, rmax, nfreq = 1000, nrings = 100):
 	spec_disk creates arrays of frequency and monchromatic luminosity for a disk
 	
 	Arguments:
-		f1, f2 		frequency limits
+		f1, f2 		frequency limits Hz
 		m			mass of cental object in msol
-		rmin, rmax	minimum and maximum radius
+		rmin, rmax	minimum and maximum radius in cm
 		mdot			accretion rate in msol / yr
 		nfreq		number of frequency points [optional]
 		nrings 		number of disk annuli [optional]
@@ -181,8 +181,7 @@ def spec_disk ( f1, f2, m, mdot, rmin, rmax, nfreq = 1000, nrings = 100):
 		for i in range(len(freq)):
 
 			spec[i] = spec[i] + ( planck_nu(t,freq[i]) * area * PI * 2.)
-			
-			
+						
 	return freq,spec
 	
 
@@ -192,7 +191,7 @@ def spec_disk ( f1, f2, m, mdot, rmin, rmax, nfreq = 1000, nrings = 100):
 def tdisk (m, mdot, r):
 
 	''' 
-	reference temperature of a disk 
+	tdisk gives the reference temperature of a disk 
 	m	black holes mass
 	r	minimum radius
 	mdot accretion rate
