@@ -238,12 +238,13 @@ def read_convergence (root ):
 	conv_fraction = []
 	with open(root, 'r') as searchfile:
         	for line in searchfile:
-            
+
            	 	# check if we have a matom_diagnostics line reporting level emissivities
             		if 'Summary  convergence' in line:
                 
                 		data = line.split()
 				conv_fraction.append(float (data[3]))
+                print conv_fraction
 
 	final_conv = conv_fraction [-1]
 	return final_conv

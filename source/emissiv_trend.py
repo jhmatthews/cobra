@@ -50,7 +50,7 @@ cobra.print_cobra()
 
 
 # we iterate over blackbody temperatire
-t_init = 8000.0 # this is the starting temperture of the blackbody
+t_init = 10000.0 # this is the starting temperture of the blackbody
 imax = 10 # maximum steps we iterate over
 i_temp_steps = 1000  # step widths in temp space
 MACRO = 7

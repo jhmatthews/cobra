@@ -101,7 +101,62 @@ class line:
 		self.g_u = _g_u
 		self.ll = _ll
 		self.lu = _lu
-
+		
+		
+		
+# line class: analogous to line ptr in python. contains freq, oscillator strength, 
+class level:
+	'''Stores information from a Python levels file'''
+	def __init__(self, _z, _ion, _lvl, _ionpot, _E, _g, _rad_rate, _bracks, _nnstring):
+		self.z = _z
+		self.ion = _ion
+		self.lvl = _lvl
+		self.ionpot = _ionpot
+		self.E = _E
+		self.g = _g
+		self.rad_rate = _rad_rate
+		self.bracks = _bracks
+		self.nnstring = _nnstring
+		
+class chianti_level:
+	'''
+	Stores chianti level data from file format .elvlc
+	See http://www.chiantidatabase.org/cug.pdf Page 8 for description
+	'''
+	def __init__(self, _index,  _config, _notation, _spin, _l, _l_symbol, _j, _multiplicity, _E_obs, _E_obs2, _E_th, _E_th2, _n):
+		self.index = _index
+		self.config = _config
+		self.notation = _notation
+		self.spin = _spin
+		self.l = _l
+		self.l_symbol = _l_symbol 
+		self.j = _j
+		self.multiplicity = _multiplicity
+		self.E_obs = _E_obs
+		self.E_obs2 = _E_obs2
+		self.E_th = _E_th
+		self.E_th2 = _E_th2
+		self.n = _n
+		
+class chianti_rad:
+	'''
+	Stores radiative chianti information from wgfa file.
+	Contains the wavelengths, gf and A values of the transitions and the indices initial and
+	final level corresponding to the indices of the levels as given in the .elvlc file
+	See http://www.chiantidatabase.org/cug.pdf Page 9 for description
+	'''
+	def __init__(self, _ll, _lu, _wave, _osc, _A):
+		self.ll = _ll
+		self.lu = _lu
+		self.wave = _wave
+		self.osc = _osc
+		self.A = _A
+		
+		
+		
+		
+		
+		
 
 
 
