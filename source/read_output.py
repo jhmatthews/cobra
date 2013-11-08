@@ -184,7 +184,7 @@ def read_emissivity ( root ):
     
     # search file for smieeisivities string    
     matom_emiss, matom_abs = [], []
-    
+    kpkt_emiss = 0
     with open(root, 'r') as searchfile:
         for line in searchfile:
             

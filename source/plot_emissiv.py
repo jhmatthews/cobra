@@ -23,37 +23,62 @@ import pylab as pl
 import numpy as np
 import sys, os, subprocess
 import read_output as rd
+fig = plt.figure()
+i_plot = 0
+for i in range(1, len(sys.argv), 2):
 
-root = sys.argv[1]
+	root = sys.argv[i]
+	label = sys.argv[i+1]
+	
+	
+	if 'cab' in root:
+		seaton =[[2.71, 1.00, 0.506, 0.298, 0.192, 0.132, 0.095, 0.071], \
+		 [2.79, 1.00, 0.491, 0.282, 0.178, 0.120, 0.085, 0.063]]
+		 
+		oster_case_b = [[2.87, 1.00, 0.466, 0.256, 0.158, 0.105, 0.073, 0.0529] , \
+		                [2.76, 1.00, 0.474, 0.262, 0.162, 0.107, 0.074, 0.0538]]
+	else:
+		seaton = [[1.91, 1.00, 0.589, 0.378, 0.258, 0.184, 0.137, 0.104], \
+	          [1.99, 1.00, 0.569, 0.356, 0.238, 0.167, 0.122, 0.092]]
+		
 
-label = sys.argv[2]
+	rootfolder = 'diag_%s/' % root
+
+	matom_emiss, kpkt_emiss = rd.read_emissivity ( rootfolder + root )
+
+	nlevels_macro = len(matom_emiss)
+	n_array = np.arange (nlevels_macro)
+	n_array = n_array+1.0
+	rd.setpars()    # set standard plotting parameters
+
+	hbeta = matom_emiss[3]
+	#hbeta.append(hbeta)
+	print hbeta
+
+	# scatter plot of level emissivities
+	if 'cab' in root: label = label + " Case B" 
+	ax = fig.add_subplot(2,1,i_plot+1)
+	ax.set_title(label)
+	ax.plot(n_array, matom_emiss / hbeta,  label = 'Python')
+	ax.scatter(n_array[2:10], seaton[i_plot], label = 'L-mixed predictions from Seaton 1959',s=30)
+	if 'cab' in root:
+		ax.scatter(np.arange(3,11), oster_case_b[i_plot], label="Osterbrock", c='r', s=10)
+	ax.set_xlabel( "n" )
+	ax.set_ylabel( r"Balmer decrement ($E_n$ / $E_{H\beta}$)" )
+	plt.xlim(0,11)
+	plt.ylim(0,3)
+	if i ==1: plt.legend()
+	i_plot+=1
 
 
 
-rootfolder = 'diag_%s/' % root
 
-matom_emiss, kpkt_emiss = rd.read_emissivity ( rootfolder + root )
-
-nlevels_macro = len(matom_emiss)
-n_array = np.arange (nlevels_macro)
+plt.savefig ( "seaton_emissiv.png" )
 
 
-rd.setpars()    # set standard plotting parameters
-
-hbeta = matom_emiss[3]
-#hbeta.append(hbeta)
-print hbeta
-
-# scatter plot of level emissivities
-plt.suptitle(label)
-plt.scatter(n_array, matom_emiss / hbeta)
-plt.xlabel( "n" )
-plt.ylabel( "Macro atom level emissivities / H_beta level emissivity" )
-plt.savefig ( root + "_emissiv.png" )
-
-arr = [86354000.0, 115280000.0, 164750000.0]
-temp = [ ]
-plt.plot()
+#arr = [86354000.0, 115280000.0, 164750000.0]
+#temp = [ ]
+#plt.plot()
 
 
 
