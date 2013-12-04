@@ -21,7 +21,13 @@ import sys
 def smooth_spectrum( spectrum, smooth_factor ):
     
     # initialise the spectrum array with blank arrays
-    smoothed_spectrum = cls.specclass ([],[],[],[],[],[], [], [], []) 
+    len_specs = len(spectrum.spec[0]) - smooth_factor
+    nspecs = len(spectrum.spec)
+
+    dummy = np.array( [ np.arange(len_specs) for i in range(nspecs)] )
+
+
+    smoothed_spectrum = cls.specclass ([],[],[],[],[],[], [], [], dummy) 
     
     # we don't want to smooth over frequency and wavelength, just shorten them!
     smoothed_spectrum.freq = spectrum.freq
@@ -34,7 +40,9 @@ def smooth_spectrum( spectrum, smooth_factor ):
     smoothed_spectrum.wind = smooth_arrays (spectrum.wind, smooth_factor)
     smoothed_spectrum.scattered = smooth_arrays (spectrum.scattered, smooth_factor)
     smoothed_spectrum.hitsurf = smooth_arrays (spectrum.hitsurf, smooth_factor)
-    smoothed_spectrum.spec = smooth_arrays (spectrum.spec, smooth_factor)
+
+    for i in range(nspecs):
+        smoothed_spectrum.spec[i] = smooth_arrays (spectrum.spec[i], smooth_factor)
     
     return smoothed_spectrum
 
@@ -48,24 +56,23 @@ def smooth_arrays (array, smooth):
     n = len (array)     # number of arrays to smooth
     bin = float(smooth)     # create a floating point variable
     
-    # first we loop over n arrays, index i
-    for i in range( n ):
+
         
-        temp1=[]    # temporary array
+    temp1=[]    # temporary array
         
-        # now loop over the length of said arrays, index j
-        for j in range( len(array[i]) - smooth):
+    # now loop over the length of said arrays, index j
+    for j in range( len(array) - smooth):
+         
+        temp=0.0
             
-            temp=0.0
-            
-            # now do the smoothing, loop over index k
-            for k in range(smooth):
+        # now do the smoothing, loop over index k
+        for k in range(smooth):
                 
-                temp = temp + float(array[j+k])
+            temp = temp + float(array[j+k])
                 
-            temp1.append ( temp/bin )
+        temp1.append ( temp/bin )
                                
-        smoothed_array.append(temp1)
+    smoothed_array = temp1
         
     return smoothed_array   
     
