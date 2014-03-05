@@ -25,10 +25,10 @@ import sys, os, subprocess
 import read_output as rd
 fig = plt.figure()
 i_plot = 0
-for i in range(1, len(sys.argv), 2):
+for i in range(1, len(sys.argv)):
 
 	root = sys.argv[i]
-	label = sys.argv[i+1]
+	#label = sys.argv[i+1]
 	
 	
 	if 'cab' in root:
@@ -55,17 +55,19 @@ for i in range(1, len(sys.argv), 2):
 	#hbeta.append(hbeta)
 	print hbeta
 
+	label = "Case A" 
 	# scatter plot of level emissivities
-	if 'cab' in root: label = label + " Case B" 
+	if 'cab' in root: label = "Case B" 
+
 	ax = fig.add_subplot(2,1,i_plot+1)
-	ax.set_title(label)
-	ax.plot(n_array, matom_emiss / hbeta,  label = 'Python')
-	ax.scatter(n_array[2:10], seaton[i_plot], label = 'L-mixed predictions from Seaton 1959',s=30)
-	if 'cab' in root:
-		ax.scatter(np.arange(3,11), oster_case_b[i_plot], label="Osterbrock", c='r', s=10)
-	ax.set_xlabel( "n" )
-	ax.set_ylabel( r"Balmer decrement ($E_n$ / $E_{H\beta}$)" )
-	plt.xlim(0,11)
+	plt.text(9,1,label)
+	ax.scatter(n_array, matom_emiss / hbeta,  label = '\\textsc{Python}', s=80, edgecolors='k', facecolors='none')
+	ax.scatter(n_array[2:10], seaton[i_plot], label = 'Seaton (1959)',s=20, color='k')
+	#if 'cab' in root:
+	#	ax.scatter(np.arange(3,11), oster_case_b[i_plot], label="Osterbrock", c='r', s=10)
+	if i==2: ax.set_xlabel( "$n_{upper}$" )
+	ax.set_ylabel( r"Balmer decrement ($F_n$ / $F_{\beta}$)" )
+	plt.xlim(2.5,10.5)
 	plt.ylim(0,3)
 	if i ==1: plt.legend()
 	i_plot+=1
