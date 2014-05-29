@@ -44,6 +44,19 @@ class specclass:
         self.hitSurf = hit
         self.spec = spe
 
+class macroclass:
+    '''This is a class for storing any values read from a Python macro atom spec file'''	
+    def __init__(self, fre, wave, emi, cen, dis, win, l, hit, spe):
+        self.freq = fre
+        self.wavelength = wave
+        self.emitted = emi
+        self.censrc = cen
+        self.disk = dis
+        self.wind = win
+        self.lines = l
+        self.hitSurf = hit
+        self.spec = spe
+
 
 class topbase_class:
 	'''This is a class for topbase photoionization data'''	

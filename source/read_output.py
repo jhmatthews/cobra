@@ -41,7 +41,37 @@ def read_spec_file (filename):
     spectrum.censrc = spectrum_temp[3]
     spectrum.disk = spectrum_temp[4]
     spectrum.wind = spectrum_temp[5] 
-    spectrum.scattered = spectrum_temp[6]
+    spectrum.scattered = spectrum_temp[7]
+    spectrum.hitsurf = spectrum_temp[6]
+    spectrum.spec = spectrum_temp[8:]
+        
+     #finally, return the spectrum class which is a series of named arrays      
+    return spectrum
+
+
+def macro_spec (filename):
+    
+    '''reads a Python .spec file and places in specclass array,
+       which is returned'''
+    
+    if not '.spec' in filename: 
+        filename = filename + '.spec'
+        
+    
+    # initialise the spectrum array with blank arrays
+    spectrum = cls.macroclass ([],[],[],[],[],[], [], [], []) 
+    
+    # first read the file into a temporary storage array
+    spectrum_temp = np.loadtxt (filename, comments ='#', unpack=True)
+    
+    # now set the correct elements of the class to be the temporary array
+    spectrum.freq = spectrum_temp[0]
+    spectrum.wavelength = spectrum_temp[1]
+    spectrum.emitted = spectrum_temp[2]
+    spectrum.censrc = spectrum_temp[3]
+    spectrum.disk = spectrum_temp[4]
+    spectrum.wind = spectrum_temp[5] 
+    spectrum.lines = spectrum_temp[6]
     spectrum.hitsurf = spectrum_temp[7]
     spectrum.spec = spectrum_temp[8:]
         
