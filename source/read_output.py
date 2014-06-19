@@ -282,6 +282,47 @@ def read_convergence (root ):
 
 
 
+def read_pf(root):
+
+    if not ".pf" in root:
+        root = root + ".pf"
+
+    params, vals = np.loadtxt(root, dtype="string", unpack=True)
+
+    pf_dict = dict()
+
+    old_param = None 
+    old_val = None
+
+    for i in range(len(params)):
+
+
+        # convert if it is a float
+        try:
+            val = float(vals[i])
+
+        except ValueError:
+            val = vals[i]
+
+        if params[i] == old_param:
+
+            if isinstance(pf_dict[params[i]], list):
+                pf_dict[params[i]].append(val)
+
+            else:
+                pf_dict[params[i]] = [old_val, val]
+
+        else:
+            pf_dict[params[i]] = val
+
+        old_param = params[i]
+        old_val = val
+
+
+    return pf_dict
+
+
+
 
 
 
