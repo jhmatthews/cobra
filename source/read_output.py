@@ -19,31 +19,41 @@ import matplotlib.pyplot as plt
 import subprocess
 
 
-def read_spec_file (filename):
+def read_spec_file (filename, new=True):
     
     '''reads a Python .spec file and places in specclass array,
        which is returned'''
     
     if not '.spec' in filename: 
         filename = filename + '.spec'
+
+    if new:
+        add = 0
+    else:
+        add = 1
         
     
     # initialise the spectrum array with blank arrays
-    spectrum = cls.specclass ([],[],[],[],[],[], [], [], []) 
+    spectrum = cls.specclass ([],[],[],[],[],[],[], [], [], []) 
     
     # first read the file into a temporary storage array
     spectrum_temp = np.loadtxt (filename, comments ='#', unpack=True)
     
     # now set the correct elements of the class to be the temporary array
+    #spectrum.tot = spectrum_temp[0]
     spectrum.freq = spectrum_temp[0]
     spectrum.wavelength = spectrum_temp[1]
-    spectrum.emitted = spectrum_temp[2]
-    spectrum.censrc = spectrum_temp[3]
-    spectrum.disk = spectrum_temp[4]
-    spectrum.wind = spectrum_temp[5] 
-    spectrum.scattered = spectrum_temp[7]
-    spectrum.hitsurf = spectrum_temp[6]
-    spectrum.spec = spectrum_temp[8:]
+
+    if new:
+        spectrum.created = spectrum_temp[2]
+
+    spectrum.emitted = spectrum_temp[3-add]
+    spectrum.censrc = spectrum_temp[4-add]
+    spectrum.disk = spectrum_temp[5-add]
+    spectrum.wind = spectrum_temp[6-add] 
+    spectrum.scattered = spectrum_temp[8-add]
+    spectrum.hitsurf = spectrum_temp[7-add]
+    spectrum.spec = spectrum_temp[9-add:]
         
      #finally, return the spectrum class which is a series of named arrays      
     return spectrum
@@ -80,17 +90,22 @@ def macro_spec (filename):
 
 
 
-def read_spectot_file (filename):
+def read_spectot_file (filename, new=True):
     
     '''reads a Python .spec_tot file and places in spectotclass array,
        which is returned'''
     
-    if not '.spec_tot' in filename: 
-        filename = filename + '.spec_tot'
+    if not 'spec_tot' in filename: 
+        filename = filename + '.log_spec_tot'
+
+    if new:
+        add = 0
+    else:
+        add = 1
         
     
     # initialise the spectrum array with blank arrays
-    spectrum = cls.spectotclass ([],[],[],[],[],[], [], []) 
+    spectrum = cls.spectotclass ([],[],[],[],[],[],[], [], []) 
     
     # first read the file into a temporary storage array
     spectrum_temp = np.loadtxt (filename, comments ='#', unpack=True)
@@ -98,12 +113,14 @@ def read_spectot_file (filename):
     # now set the correct elements of the class to be the temporary array
     spectrum.freq = spectrum_temp[0]
     spectrum.wavelength = spectrum_temp[1]
-    spectrum.emitted = spectrum_temp[2]
-    spectrum.censrc = spectrum_temp[3]
-    spectrum.disk = spectrum_temp[4]
-    spectrum.wind = spectrum_temp[5] 
-    spectrum.scattered = spectrum_temp[6]
-    spectrum.hitsurf = spectrum_temp[7]
+
+    if new:
+        spectrum.created = spectrum_temp[2]
+    spectrum.emitted = spectrum_temp[3-add]
+    spectrum.censrc = spectrum_temp[4-add]
+    spectrum.disk = spectrum_temp[5-add]
+    spectrum.wind = spectrum_temp[6-add] 
+    spectrum.hitsurf = spectrum_temp[7-add]
     
     #finally, return the spectrum class which is a series of named arrays    
     return spectrum

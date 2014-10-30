@@ -19,9 +19,10 @@ Arguments:
 
 class spectotclass:
     '''This is a class for storing any values read from a Python spec_tot file'''	
-    def __init__(self, fre, wave, emi, cen, dis, win, sca, hit):
+    def __init__(self, fre, wave, create, emi, cen, dis, win, sca, hit):
         self.freq = fre
         self.wavelength = wave
+        self.created = create
         self.emitted = emi
         self.censrc = cen
         self.disk = dis
@@ -33,9 +34,10 @@ class spectotclass:
 
 class specclass:
     '''This is a class for storing any values read from a Python spec file'''	
-    def __init__(self, fre, wave, emi, cen, dis, win, sca, hit, spe):
+    def __init__(self, fre, wave, prod, emi, cen, dis, win, sca, hit, spe):
         self.freq = fre
         self.wavelength = wave
+        self.created = prod
         self.emitted = emi
         self.censrc = cen
         self.disk = dis
